@@ -33,7 +33,7 @@ pipeline {
                         
                         // Deploy the WAR file to Tomcat using the corrected URL for Tomcat 7+
                         bat """
-                        curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -T ${WAR_FILE} ${TOMCAT_URL}/deploy?path=/beststore
+                        curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -X POST -F "file=@${WAR_FILE}" ${TOMCAT_URL}/deploy?path=/beststore
                         """
                     } else {
                         error "WAR file target/beststore.war does not exist!"
