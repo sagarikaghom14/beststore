@@ -2,63 +2,60 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.8.6' // Ensure this version is configured in Jenkins
-        jdk 'JDK 11'      // Ensure this JDK version is configured in Jenkins
+        maven 'Maven 3.8.6' // Ensure Maven is configured in Jenkins
+        jdk 'JDK 11'        // Ensure JDK is configured in Jenkins
+    }
+
+    environment {
+        DEPLOY_DIR = 'C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\' // Tomcat webapps directory
+        WAR_FILE = 'target\\java-maven-project.war'                                         // Name of your WAR file
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout code from SCM
-                checkout scm
+                checkout scm // Pull the code from the repository
             }
         }
 
         stage('Build') {
             steps {
-                // Build the project using Maven
-                sh 'mvn clean install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                // Run unit tests
-                sh 'mvn test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                // Package the application
-                sh 'mvn package'
+                bat 'mvn clean package' // Build the project and generate the WAR file
             }
         }
 
         stage('Deploy') {
             steps {
-                // Simple deployment example
-                sh 'echo "Deploying application..."'
-                // Example of copying artifacts to a deploy location
-                sh 'cp target/basic-java-app-1.0-SNAPSHOT.jar /path/to/deploy/'
+                script {
+                    // Check if the WAR file exists
+                    if (!fileExists(WAR_FILE)) {
+                        error "WAR file ${WAR_FILE} does not exist!"
+                    }
+
+                    // Deploy the WAR file to Tomcat
+                    bat """
+                        echo Deploying WAR file...
+                        copy /Y ${WAR_FILE} "${DEPLOY_DIR}"
+                        echo Restarting Tomcat server...
+                        net stop Tomcat10 // Stop the Tomcat service (update to your service name)
+                        net start Tomcat10 // Start the Tomcat service
+                    """
+                }
             }
         }
     }
 
     post {
         always {
-            // Clean up actions
-            sh 'echo "Cleaning up..."'
+            echo 'Pipeline completed.'
         }
 
         success {
-            // Actions on successful build
-            echo 'Build succeeded!'
+            echo 'Build and deployment successful!'
         }
 
         failure {
-            // Actions on failed build
-            echo 'Build failed!'
+            echo 'Build or deployment failed. Check logs for details.'
         }
     }
 }
