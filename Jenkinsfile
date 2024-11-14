@@ -4,7 +4,7 @@ pipeline {
     environment {
         TOMCAT_USER = 'sagarika'       // Username for Tomcat manager
         TOMCAT_PASSWORD = 'Sagarika123'  // Password for Tomcat manager
-        TOMCAT_URL = 'http://localhost:8082/manager'
+        TOMCAT_URL = 'http://localhost:8082/manager/text' // Corrected URL for Tomcat Manager's text interface
         WAR_FILE = 'target/beststore.war'  // Path to the WAR file to deploy
     }
 
@@ -31,9 +31,9 @@ pipeline {
                     if (fileExists(WAR_FILE)) {
                         echo "Deploying beststore.war to Tomcat"
                         
-                        // Use `start` to run in the background on Windows instead of `nohup`
+                        // Deploy the WAR file to Tomcat using the corrected URL for Tomcat 7+
                         bat """
-                        start curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -T ${WAR_FILE} ${TOMCAT_URL}/deploy?path=/beststore
+                        curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -T ${WAR_FILE} ${TOMCAT_URL}/deploy?path=/beststore
                         """
                     } else {
                         error "WAR file target/beststore.war does not exist!"
