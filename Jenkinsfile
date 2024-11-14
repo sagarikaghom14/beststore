@@ -30,10 +30,10 @@ pipeline {
                     // Check if the WAR file exists
                     if (fileExists(WAR_FILE)) {
                         echo "Deploying beststore.war to Tomcat"
-
-                        // Deploy the WAR file to Tomcat using curl
-                        sh """
-                        curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -T ${WAR_FILE} ${TOMCAT_URL}/deploy?path=/beststore
+                        
+                        // Use `start` to run in the background on Windows instead of `nohup`
+                        bat """
+                        start curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -T ${WAR_FILE} ${TOMCAT_URL}/deploy?path=/beststore
                         """
                     } else {
                         error "WAR file target/beststore.war does not exist!"
