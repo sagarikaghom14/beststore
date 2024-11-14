@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.9.9' // Ensure this matches the name you gave Maven in Global Tool Configuration
-    }
-
     environment {
         TOMCAT_USER = 'sagarika'       // Username for Tomcat manager
         TOMCAT_PASSWORD = 'Sagarika123'  // Password for Tomcat manager
@@ -35,20 +31,10 @@ pipeline {
                     if (fileExists(WAR_FILE)) {
                         echo "Deploying beststore.war to Tomcat"
 
-                        // Deploy the WAR file to Tomcat using HTTP request
-                        def deployResponse = httpRequest(
-                            acceptType: 'APPLICATION_JSON',
-                            contentType: 'APPLICATION_FORM',
-                            url: "${TOMCAT_URL}/deploy",
-                            authentication: 'tomcat-credentials',  // Jenkins credentials (configured in Jenkins)
-                            body: [
-                                'path'  : '/beststore',
-                                'war'   : file(WAR_FILE)
-                            ],
-                            httpMode: 'POST'
-                        )
-
-                        echo "Deployment response: ${deployResponse}"
+                        // Deploy the WAR file to Tomcat using curl
+                        sh """
+                        curl -u ${TOMCAT_USER}:${TOMCAT_PASSWORD} -T ${WAR_FILE} ${TOMCAT_URL}/deploy?path=/beststore
+                        """
                     } else {
                         error "WAR file target/beststore.war does not exist!"
                     }
